@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Toxic Comment Detector",
+  "version": "5.0",
+  "description": "Tự động phát hiện và làm mờ bình luận độc hại trên Facebook.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://*.facebook.com/*",
+    "https://vijjj1-toxic-comment-app.hf.space/*",
+    "https://vijjj1-vit.hf.space/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://*.facebook.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>C-BOX Controller</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="lock-screen" class="hidden">
+      <div class="lock-icon">🔒</div>
+      <h3>Hệ thống đang khóa</h3>
+      <p class="subtitle">Nhập mật khẩu để truy cập cài đặt</p>
+      <input type="password" id="lock-input" placeholder="Nhập mật khẩu..." />
+      <button id="btn-unlock" class="on">MỞ KHÓA</button>
+      <p id="lock-error" class="error-text"></p>
+  </div>
+
+  <div id="main-app">
+      <div class="header">
+          <h2>C-BOX Shield</h2>
+          <span class="version">v11.2</span>
+      </div>
+      <p class="subtitle">Hệ thống giám sát & làm sạch môi trường mạng.</p>
+
+      <div class="control-panel">
+          <div class="control-row">
+              <label for="level-select">Cấp độ bảo vệ:</label>
+              <select id="level-select">
+                  <option value="child">🛡️ Trẻ em (Nghiêm ngặt)</option>
+                  <option value="teen">⚖️ Thiếu niên (Vừa phải)</option>
+                  <option value="adult">👀 Người lớn (Giám sát)</option>
+              </select>
+          </div>
+          <button id="btn-password" class="small-btn">🔑 Đổi mật khẩu</button>
+      </div>
+
+      <button id="toggle" class="off">BẬT PHÂN TÍCH</button>
+      
+      <p id="status" class="status-text">Trạng thái: Đang tắt</p>
+
+      <hr />
+
+      <h3>Thống kê phiên hiện tại</h3>
+      <div id="summary" class="summary-box">
+        Đang lấy dữ liệu...
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">Tỷ lệ Toxic (Block/Total)</div>
+          <div class="chart-bar-bg">
+            <div class="chart-bar-fill" id="chart-bar-fill"></div>
+          </div>
+          <div class="chart-bar-text" id="chart-bar-text">0%</div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Phân loại</div>
+          <div class="chart-pie" id="chart-pie"></div>
+          <div class="chart-pie-legend">
+            <span class="legend toxic"></span> Toxic
+            <span class="legend normal"></span> Sạch
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:12px">Cảm xúc (Real-time)</h3>
+      <div id="emotion-list" class="emotion-box">
+          <div style="text-align:center; color:#888; font-size:11px">Đang chờ dữ liệu...</div>
+      </div>
+      
+      <button id="clear-data" class="secondary">XÓA DỮ LIỆU & QUÉT LẠI</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
