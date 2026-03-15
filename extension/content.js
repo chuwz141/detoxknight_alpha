@@ -1,7 +1,7 @@
 (function () {
-  if (window.__ToxicV14Loaded) return;
-  window.__ToxicV14Loaded = true;
-  console.log("Toxic Analyzer v14.3 - Realtime Fix Loaded");
+  if (window.__DetoXKnightLoaded) return;
+  window.__DetoXKnightLoaded = true;
+  console.log("DetoXKnight v5.0 - Loaded");
 
   // --- 1. CẤU HÌNH & LOCAL RULES ---
   const MAX_CONCURRENT = 4;
@@ -51,7 +51,7 @@
   let ramCache = new Map();
   const nodeQueue = []; 
   let activeRequests = 0;
-  let globalStats = { postsAnalyzed: 0, toxicPosts: 0, totalComments: 0, toxicComments: 0, emotions: {} };
+  let globalStats = { postsAnalyzed: 0, toxicPosts: 0, totalComments: 0, toxicComments: 0 };
 
   // --- 3. CACHE & API ---
   function loadCache() {
@@ -69,7 +69,7 @@
       if (!res) return null;
       let data = Array.isArray(res) ? (Array.isArray(res[0]) ? res[0][0] : res[0]) : res;
       let label = data.label || data.class || "neutral";
-      const labelMap = { "LABEL_0": "neutral", "LABEL_1": "positive", "LABEL_2": "negative", "LABEL_3": "angry", "LABEL_4": "sarcasm" };
+      const labelMap = { "LABEL_0": "neutral", "LABEL_1": "Toxic" };
       if (labelMap[label]) label = labelMap[label];
       let score = data.score || data.prob || data.probability || 0;
       if (Array.isArray(data.probabilities)) score = Math.max(...data.probabilities);
@@ -107,15 +107,13 @@
 
     activeRequests++;
     
-    Promise.all([
-        fetchWithTimeout("https://vijjj1-toxic-comment-app.hf.space/predict", { comment: text }).then(r=>r.json()).catch(()=>null),
-        fetchWithTimeout("https://vijjj1-vit.hf.space/predict", { comment: text }).then(r=>r.json()).catch(()=>null)
-    ])
-    .then(([toxicRes, rawEmotion]) => {
-        if (!toxicRes && !rawEmotion) return null;
+    fetchWithTimeout("https://vijjj1-toxic-comment-app.hf.space/predict", { comment: text })
+    .then(r => r.json())
+    .catch(() => null)
+    .then(toxicRes => {
+        if (!toxicRes) return null;
         const cleanToxic = parseData(toxicRes);
-        const cleanEmotion = parseData(rawEmotion);
-        return { toxic: cleanToxic, emotion: cleanEmotion };
+        return { toxic: cleanToxic };
     })
     .then((result) => {
         if (result) {
@@ -171,16 +169,13 @@
       
       const toxicLabel = result.toxic.label;
       const toxicScore = result.toxic.score || 0;
-      const emotion = (result.emotion?.label || "neutral").toLowerCase();
       const level = USER_SETTINGS.level;
 
       if (level === "child") {
           if (toxicLabel === "Toxic" && toxicScore > 0.5) return { block: true, reason: `Độc hại ${(toxicScore*100).toFixed(0)}%` };
-          if (["angry", "negative", "sarcasm"].includes(emotion) && result.emotion.score > 0.65) return { block: true, reason: `Tiêu cực/Mỉa mai` };
       }
       if (level === "teen") {
           if (toxicLabel === "Toxic" && toxicScore > 0.64) return { block: true, reason: `Độc hại ${(toxicScore*100).toFixed(0)}%` };
-          if (emotion === "angry" && result.emotion.score > 0.8) return { block: false, reason: `Phẫn nộ` };
       }
       if (level === "adult") {
           if (toxicLabel === "Toxic" && toxicScore > 0.89) return { block: true, reason: `Cực độc ${(toxicScore*100).toFixed(0)}%` };
@@ -212,8 +207,6 @@
 
   function updateStats(result, type) {
       if (!result) return;
-      const key = (result.emotion?.label || "neutral").toLowerCase();
-      globalStats.emotions[key] = (globalStats.emotions[key] || 0) + 1;
       if (type === 'post' || type === 'image_ocr') { globalStats.postsAnalyzed++; if(result.toxic?.label==="Toxic") globalStats.toxicPosts++; } 
       else { globalStats.totalComments++; if(result.toxic?.label==="Toxic") globalStats.toxicComments++; }
   }
@@ -221,17 +214,16 @@
   function injectBadge(node, result, type) {
       if (node.style.display === 'none' || node.closest('.toxic-gone') || node.querySelector(".toxic-cmt-pill") || (node.nextSibling && node.nextSibling.className === "toxic-cmt-pill")) return;
       
-      const emo = EMO_CONFIG[(result?.emotion?.label || "neutral").toLowerCase()] || EMO_CONFIG["neutral"];
       const isToxic = result?.toxic?.label === "Toxic";
       const toxicScore = result?.toxic?.score || 0; 
 
       if (type === 'comment') {
+          if (!isToxic) return;
           const span = document.createElement("span");
           span.className = "toxic-cmt-pill";
-          span.style.backgroundColor = emo.bg; span.style.color = emo.color;
-          span.style.border = `1px solid ${emo.color}30`;
-          const icon = isToxic ? `<span class="toxic-icon" style="margin-right:2px; color:#c62828">⚠️ ${(toxicScore*100).toFixed(0)}%</span>` : "";
-          span.innerHTML = `${icon} <span class="toxic-icon">${emo.icon}</span> ${emo.label}`;
+          span.style.backgroundColor = "#fdecea"; span.style.color = "#c62828";
+          span.style.border = `1px solid #c6282830`;
+          span.innerHTML = `<span class="toxic-icon">⚠️ ${(toxicScore*100).toFixed(0)}%</span>`;
           node.appendChild(span);
       } else if (type === 'post') { 
            let container = node.closest('div[data-ad-comet-preview="message"]')?.parentNode;
@@ -240,25 +232,19 @@
            if (container && !container.querySelector('.toxic-post-bar')) {
               const div = document.createElement("div");
               div.className = "toxic-post-bar";
-              div.innerHTML = `<b style="color:${isToxic?'#c62828':'#2e7d32'}">${isToxic?'⚠️ ĐỘC HẠI':'✅ SẠCH'}</b> <span style="margin-left:8px; color:${emo.color}">${emo.icon} ${emo.label}</span>`;
+              div.innerHTML = `<b style="color:${isToxic?'#c62828':'#2e7d32'}">${isToxic?'⚠️ ĐỘC HẠI':'✅ SẠCH'}</b>`;
               if(node.closest('div[data-ad-comet-preview="message"]')) node.closest('div[data-ad-comet-preview="message"]').after(div);
               else node.after(div);
            }
       }
   }
 
-  const EMO_CONFIG = {
-      "angry":    { label: "Phẫn nộ", color: "#d32f2f", icon: "😡", bg: "#fdecea" },
-      "sarcasm":  { label: "Mỉa mai", color: "#7b1fa2", icon: "😏", bg: "#f3e5f5" },
-      "negative": { label: "Tiêu cực", color: "#ef6c00", icon: "😞", bg: "#fff3e0" },
-      "positive": { label: "Tích cực", color: "#2e7d32", icon: "😃", bg: "#e8f5e9" },
-      "neutral":  { label: "Trung tính", color: "#616161", icon: "😐", bg: "#f5f5f5" }
-  };
+
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => { 
       if (msg.type === "CMD_RESET_ALL") {
           ramCache.clear(); spamTracker.clear();
-          globalStats = { postsAnalyzed: 0, toxicPosts: 0, totalComments: 0, toxicComments: 0, emotions: {} };
+          globalStats = { postsAnalyzed: 0, toxicPosts: 0, totalComments: 0, toxicComments: 0 };
           // Logic re-apply đơn giản
           document.querySelectorAll('.toxic-cmt-pill, .toxic-post-bar, .toxic-hidden-placeholder').forEach(el => el.remove());
           document.querySelectorAll('.toxic-gone').forEach(el => { el.classList.remove('toxic-gone'); el.style.display = ''; });

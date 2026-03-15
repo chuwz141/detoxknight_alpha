@@ -15,19 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const barFillEl = document.getElementById("chart-bar-fill");
   const barTextEl = document.getElementById("chart-bar-text");
   const pieEl = document.getElementById("chart-pie");
-  const emotionListEl = document.getElementById("emotion-list");
 
   // --- STATE ---
   let savedPassword = null;
-
-  // --- CONFIG ---
-  const EMO_MAP = {
-      "angry":    { label: "PHẪN NỘ", color: "#dc3545" },
-      "sarcasm":  { label: "MỈA MAI", color: "#6f42c1" },
-      "negative": { label: "TIÊU CỰC", color: "#fd7e14" },
-      "positive": { label: "TÍCH CỰC", color: "#198754" },
-      "neutral":  { label: "TRUNG TÍNH", color: "#6c757d" }
-  };
 
   // --- 1. KHỞI TẠO ỨNG DỤNG ---
   chrome.storage.local.get({ enabled: true, level: "teen", password: null }, (data) => {
@@ -115,8 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- 4. RENDER STATS (ĐÃ SỬA) ---
   function renderStats(stats) {
-      const safeStats = stats || { postsAnalyzed: 0, toxicPosts: 0, totalComments: 0, toxicComments: 0, emotions: {} };
-      const { postsAnalyzed, toxicPosts, totalComments, toxicComments, emotions } = safeStats;
+      const safeStats = stats || { postsAnalyzed: 0, toxicPosts: 0, totalComments: 0, toxicComments: 0 };
+      const { postsAnalyzed, toxicPosts, totalComments, toxicComments } = safeStats;
       
       const toxicCmtPercent = totalComments > 0 ? ((toxicComments / totalComments) * 100).toFixed(1) : "0.0";
       
@@ -131,26 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const deg = (toxicComments / (totalComments || 1)) * 360;
       pieEl.style.background = `conic-gradient(#dc3545 0deg, #dc3545 ${deg}deg, #eee ${deg}deg, #eee 360deg)`;
-
-      emotionListEl.innerHTML = "";
-      const emoData = emotions || {};
-      let totalEmo = 0;
-      Object.values(emoData).forEach(v => totalEmo += v);
-      
-      ["angry", "sarcasm", "negative", "positive", "neutral"].forEach(key => {
-          const count = emoData[key] || 0;
-          const pct = totalEmo > 0 ? ((count / totalEmo) * 100).toFixed(1) : 0;
-          const meta = EMO_MAP[key];
-          
-          const div = document.createElement("div");
-          div.className = "emo-row";
-          div.innerHTML = `
-              <div class="emo-label" style="color:${meta.color}">${meta.label}</div>
-              <div class="emo-bar-bg"><div class="emo-bar-fill" style="width:${pct}%; background-color:${meta.color}"></div></div>
-              <div class="emo-val">${count}</div>
-          `;
-          emotionListEl.appendChild(div);
-      });
   }
 
   function updateToggleUI(enabled) {

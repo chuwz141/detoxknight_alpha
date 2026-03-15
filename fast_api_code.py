@@ -5,12 +5,12 @@ import torch
 import uvicorn
 
 # ===== Load model =====
-MODEL_NAME = "vijjj1/cmt_doc_hai"
+MODEL_NAME = "chuquwz/DetoXKnight_model"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
 
 # ===== Khởi tạo FastAPI =====
-app = FastAPI(title="Toxic Comment API", version="1.0")
+app = FastAPI(title="DetoXKnight API", version="1.0")
 
 # ===== Cho phép CORS để extension/app gọi được =====
 app.add_middleware(
