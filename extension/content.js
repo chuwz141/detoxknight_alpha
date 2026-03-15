@@ -179,20 +179,20 @@
   // --- 6. DOM MANIPULATION ---
   function replaceContent(node, type, reason = "Nội dung độc hại") {
       let target = node;
-      if (type === 'post') {
-          target = node;
-      } else if (type === 'image_ocr') {
+      if (type === 'image_ocr') {
           target = node.closest('div[role="article"]') || node.closest('a') || node;
-      } else {
-          const wrapper = node.closest('li') || node.closest('div[aria-label*="Bình luận"]');
-          if (wrapper) target = wrapper;
       }
+      // comment & post: target = node (giữ avatar/tên, chỉ che text)
 
+      if (target.dataset.cboxMasked === "true") return;
+      if (target.previousElementSibling && target.previousElementSibling.classList.contains('cbox-placeholder')) return;
+
+      target.dataset.cboxMasked = "true";
       target.style.display = "none";
-      target.dataset.cboxHidden = "true";
       globalStats.blockedCount++;
 
       const ph = document.createElement("div");
+      ph.className = "cbox-placeholder";
       ph.style.cssText = "padding:6px 12px;margin:4px 0;background:#fff5f5;border:1px solid #ffcdd2;border-radius:8px;font-size:12px;";
       ph.innerHTML = `<span class="mask-text"><b style="font-family:monospace;letter-spacing:2px">***************</b><br><span style="color:#c62828;font-size:11px">${reason}</span></span> <button style="margin-left:8px;padding:1px 8px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer;font-size:11px">Xem</button>`;
       const mask = ph.querySelector(".mask-text"), btn = ph.querySelector("button");
