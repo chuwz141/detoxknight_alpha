@@ -6,7 +6,7 @@
   "permissions": ["storage"],
   "host_permissions": [
     "https://*.facebook.com/*",
-    "https://vijjj1-toxic-comment-app.hf.space/*"
+    "https://chuquwz-detoxknight.hf.space/*"
   ],
   "content_scripts": [
     {
