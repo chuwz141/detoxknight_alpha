@@ -30,10 +30,6 @@
 
   const style = document.createElement('style');
   style.textContent = `
-      .toxic-cmt-pill { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: 600; cursor: default; white-space: nowrap; vertical-align: middle; box-shadow: 0 1px 2px rgba(0,0,0,0.05); opacity: 0.9; }
-      .toxic-icon { font-size: 11px; }
-      .toxic-post-bar { display: flex; align-items: center; gap: 12px; margin-top: 8px; margin-bottom: 4px; padding: 6px 12px; background: #f0f2f5; border-radius: 8px; font-size: 12px; color: #65676b; }
-      
       .toxic-hidden-placeholder {
           font-size: 11px; color: #dc3545; font-style: italic; font-weight: 500;
           background: #fff5f5; padding: 3px 10px; border-radius: 12px;
@@ -136,9 +132,6 @@
           replaceContent(node, type, reason);
           node.dataset.cboxStatus = "blocked";
       } else {
-          if (type !== 'image_ocr') {
-              injectBadge(node, result, type);
-          }
           node.dataset.cboxStatus = "processed";
       }
   }
@@ -218,34 +211,6 @@
       else { globalStats.totalComments++; if(result.toxic?.label==="Toxic") globalStats.toxicComments++; }
   }
 
-  function injectBadge(node, result, type) {
-      if (node.style.display === 'none' || node.closest('.toxic-gone') || node.querySelector(".toxic-cmt-pill") || (node.nextSibling && node.nextSibling.className === "toxic-cmt-pill")) return;
-      
-      const isToxic = result?.toxic?.label === "Toxic";
-      const toxicScore = result?.toxic?.score || 0; 
-
-      if (type === 'comment') {
-          if (!isToxic) return;
-          const span = document.createElement("span");
-          span.className = "toxic-cmt-pill";
-          span.style.backgroundColor = "#fdecea"; span.style.color = "#c62828";
-          span.style.border = `1px solid #c6282830`;
-          span.innerHTML = `<span class="toxic-icon">⚠️ ${(toxicScore*100).toFixed(0)}%</span>`;
-          node.appendChild(span);
-      } else if (type === 'post') { 
-           let container = node.closest('div[data-ad-comet-preview="message"]')?.parentNode;
-           if (!container) container = node.closest('div[role="article"]'); 
-           
-           if (container && !container.querySelector('.toxic-post-bar')) {
-              const div = document.createElement("div");
-              div.className = "toxic-post-bar";
-              div.innerHTML = `<b style="color:${isToxic?'#c62828':'#2e7d32'}">${isToxic?'⚠️ ĐỘC HẠI':'✅ SẠCH'}</b>`;
-              if(node.closest('div[data-ad-comet-preview="message"]')) node.closest('div[data-ad-comet-preview="message"]').after(div);
-              else node.after(div);
-           }
-      }
-  }
-
 
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => { 
@@ -253,7 +218,7 @@
           ramCache.clear(); spamTracker.clear();
           globalStats = { postsAnalyzed: 0, toxicPosts: 0, totalComments: 0, toxicComments: 0 };
           // Logic re-apply đơn giản
-          document.querySelectorAll('.toxic-cmt-pill, .toxic-post-bar, .toxic-hidden-placeholder').forEach(el => el.remove());
+          document.querySelectorAll('.toxic-hidden-placeholder').forEach(el => el.remove());
           document.querySelectorAll('.toxic-gone').forEach(el => { el.classList.remove('toxic-gone'); el.style.display = ''; });
           document.querySelectorAll('[data-cbox-status]').forEach(el => delete el.dataset.cboxStatus);
       }
