@@ -201,8 +201,14 @@
 
       const ph = document.createElement("div");
       ph.style.cssText = "padding:6px 12px;margin:4px 0;background:#fff5f5;border:1px solid #ffcdd2;border-radius:8px;font-size:12px;";
-      ph.innerHTML = `<b style="font-family:monospace;letter-spacing:2px">***************</b><br><span style="color:#c62828;font-size:11px">${reason}</span> <button style="margin-left:8px;padding:1px 8px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer;font-size:11px">Xem</button>`;
-      ph.querySelector("button").onclick = () => { ph.style.display = "none"; target.style.display = ""; };
+      ph.innerHTML = `<span class="mask-text"><b style="font-family:monospace;letter-spacing:2px">***************</b><br><span style="color:#c62828;font-size:11px">${reason}</span></span> <button style="margin-left:8px;padding:1px 8px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer;font-size:11px">Xem</button>`;
+      const mask = ph.querySelector(".mask-text"), btn = ph.querySelector("button");
+      btn.onclick = () => {
+          const hidden = target.style.display === "none";
+          target.style.display = hidden ? "" : "none";
+          mask.style.display = hidden ? "none" : "";
+          btn.textContent = hidden ? "Ẩn" : "Xem";
+      };
       target.parentNode.insertBefore(ph, target);
   }
 
