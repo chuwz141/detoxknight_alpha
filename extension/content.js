@@ -179,12 +179,15 @@
   // --- 6. DOM MANIPULATION ---
   function replaceContent(node, type, reason = "Nội dung độc hại") {
       let target = node;
-      if (type === 'image_ocr') {
+      if (type === 'post') {
+          target = node.closest('div[data-ad-comet-preview="message"]') || node.closest('div[dir="auto"]')?.parentNode || node;
+      } else if (type === 'image_ocr') {
           target = node.closest('div[role="article"]') || node.closest('a') || node;
+      } else if (type === 'comment') {
+          target = node.closest('div[dir="auto"]') || node;
       }
-      // comment & post: target = node (giữ avatar/tên, chỉ che text)
 
-      if (target.dataset.cboxMasked === "true") return;
+      if (target.dataset.cboxMasked === "true" || target.dataset.cboxHidden === "true") return;
       if (target.previousElementSibling && target.previousElementSibling.classList.contains('cbox-placeholder')) return;
 
       target.dataset.cboxMasked = "true";
