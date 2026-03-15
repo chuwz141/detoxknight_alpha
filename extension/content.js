@@ -187,7 +187,7 @@
   function replaceContent(node, type, reason = "Nội dung độc hại") {
       let target = node;
       if (type === 'post') {
-          target = node; 
+          target = node;
       } else if (type === 'image_ocr') {
           target = node.closest('div[role="article"]') || node.closest('a') || node;
       } else {
@@ -195,14 +195,15 @@
           if (wrapper) target = wrapper;
       }
 
-      // Ẩn ngay lập tức
-      target.classList.add("toxic-gone");
       target.style.display = "none";
-      node.dataset.cboxHidden = "true";
+      target.dataset.cboxHidden = "true";
       globalStats.blockedCount++;
 
-      const currentLevelName = LEVEL_NAMES[USER_SETTINGS.level] || "An toàn";
-      console.log(`[C-BOX] Silently Removed ${type}: ${reason} (Mode: ${currentLevelName})`);
+      const ph = document.createElement("div");
+      ph.style.cssText = "padding:6px 12px;margin:4px 0;background:#fff5f5;border:1px solid #ffcdd2;border-radius:8px;font-size:12px;";
+      ph.innerHTML = `<b style="font-family:monospace;letter-spacing:2px">***************</b><br><span style="color:#c62828;font-size:11px">${reason}</span> <button style="margin-left:8px;padding:1px 8px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer;font-size:11px">Xem</button>`;
+      ph.querySelector("button").onclick = () => { ph.style.display = "none"; target.style.display = ""; };
+      target.parentNode.insertBefore(ph, target);
   }
 
   function updateStats(result, type) {
