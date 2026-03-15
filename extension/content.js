@@ -178,6 +178,9 @@
 
   // --- 6. DOM MANIPULATION ---
   function replaceContent(node, type, reason = "Nội dung độc hại") {
+      // Anti-Nesting: chặn thẻ con nằm trong vùng đã bị che
+      if (node.dataset.cboxMasked === "true" || node.closest('[data-cbox-masked="true"]')) return;
+
       let target = node;
       if (type === 'post') {
           target = node.closest('div[data-ad-comet-preview="message"]') || node.closest('div[dir="auto"]')?.parentNode || node;
@@ -187,7 +190,8 @@
           target = node.closest('div[dir="auto"]') || node;
       }
 
-      if (target.dataset.cboxMasked === "true" || target.dataset.cboxHidden === "true") return;
+      // Chặn trùng lặp cho target
+      if (target.dataset.cboxMasked === "true" || target.closest('[data-cbox-masked="true"]')) return;
       if (target.previousElementSibling && target.previousElementSibling.classList.contains('cbox-placeholder')) return;
 
       target.dataset.cboxMasked = "true";
@@ -204,6 +208,7 @@
           target.style.display = hidden ? "" : "none";
           mask.style.display = hidden ? "none" : "";
           btn.textContent = hidden ? "Ẩn" : "Xem";
+          // Không xóa cboxMasked để Observer không bắt lại
       };
       target.parentNode.insertBefore(ph, target);
   }
